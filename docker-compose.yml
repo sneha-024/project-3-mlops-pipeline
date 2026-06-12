@@ -1,0 +1,7 @@
+services:
+  sentiment-api:
+    image: mlops-sentiment-app:v1
+    container_name: sentiment-api
+    ports:
+      - "5000:5000"
+    restart: unless-stopped

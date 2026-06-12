@@ -1,0 +1,39 @@
+resource "aws_security_group" "mlops_sg" {
+  name        = "mlops-security-group"
+  description = "Allow SSH and Flask API"
+
+  ingress {
+    description = "SSH"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    description = "Flask API"
+    from_port   = 5000
+    to_port     = 5000
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+resource "aws_instance" "mlops_server" {
+  ami                    = "ami-05bfa4a7765f38076"
+  instance_type          = "t3.micro"
+  key_name               = "sneha-key"
+
+  vpc_security_group_ids = [aws_security_group.mlops_sg.id]
+
+  tags = {
+    Name = "MLOps-Server"
+  }
+}
