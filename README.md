@@ -1,4 +1,4 @@
-# MLOps Sentiment Analysis Pipeline 🚀
+# MLOps Sentiment Analysis Pipeline 
 
 ## Overview
 
