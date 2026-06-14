@@ -1,215 +1,126 @@
-# MLOps Sentiment Analysis Pipeline
+# MLOps Sentiment Analysis Pipeline 🚀
 
 ## Overview
+End-to-end MLOps pipeline for Sentiment Analysis — from model training to production deployment with full monitoring, CI/CD automation, and Kubernetes orchestration.
 
-This project demonstrates an end-to-end MLOps workflow for a Sentiment Analysis application.
+## Live Architecture
+Developer
+│
+▼
+GitHub Repository
+│
+▼
+GitHub Actions (Pytest → Docker Build → Docker Push)
+│
+▼
+DockerHub (sneha24012004/mlops-sentiment-app:v1)
+│
+▼
+AWS EC2 (t3.small, Ubuntu 22.04, 20GB)
+├── Flask API (Docker, Port 5000)
+├── Nginx Reverse Proxy (Port 80)
+├── Prometheus (Port 9090)
+├── Grafana + Alerts (Port 3000)
+└── Node Exporter (Port 9100)
 
-The workflow covers model training, API development, containerization, infrastructure provisioning, automated image delivery and monitoring.
+Kubernetes (Minikube Local)
+└── 3 Pods + NodePort Service + Rolling Updates
 
-The application accepts text input and predicts whether the sentiment is Positive or Negative.
-
----
 
 ## Tech Stack
 
-### Machine Learning
-
-* Python
-* Scikit-learn
-* TF-IDF Vectorizer
-* Logistic Regression
-
-### Backend
-
-* Flask
-
-### Containerization
-
-* Docker
-* Docker Hub
-
-### Infrastructure
-
-* AWS EC2
-* Terraform
-
-### CI/CD
-
-* GitHub Actions
-
-### Monitoring
-
-* Prometheus
-* Grafana
-
----
-
-## Project Architecture
-
-```text
-GitHub
-   │
-   ▼
-GitHub Actions
-   │
-   ▼
-Docker Hub
-   │
-   ▼
-AWS EC2
-   │
-   ├── Flask API (Docker Container)
-   │
-   ├── Prometheus
-   │
-   └── Grafana
-```
-
----
-
-## Features
-
-* Train a sentiment analysis model using TF-IDF and Logistic Regression
-* Serve predictions through a Flask REST API
-* Containerize the application using Docker
-* Store container images in Docker Hub
-* Provision infrastructure using Terraform
-* Deploy application on AWS EC2
-* Automate Docker image build and push using GitHub Actions
-* Monitor services using Prometheus and Grafana
-* Automatically recover services after EC2 restart
-
----
+| Layer | Technology |
+|-------|-----------|
+| ML | Python, Scikit-learn, TF-IDF, Logistic Regression |
+| API | Flask REST API |
+| Containerization | Docker, DockerHub |
+| Orchestration | Kubernetes (Minikube), Rolling Updates |
+| Infrastructure | AWS EC2, Terraform (IaC) |
+| CI/CD | GitHub Actions (Tests + Build + Push) |
+| Monitoring | Prometheus, Grafana, Node Exporter, CPU Alerts |
+| Web Server | Nginx Reverse Proxy |
 
 ## Project Structure
-
-```text
 project-3-mlops-pipeline/
-│
-├── app.py
-├── train_model.py
-├── Dockerfile
-├── docker-compose.yml
-├── requirements.txt
-│
+├── app.py # Flask REST API
+├── train_model.py # ML model training + MLflow
+├── Dockerfile # Container definition
+├── docker-compose.yml # Multi-container setup
+├── requirements.txt # Python dependencies
 ├── model/
-│   ├── model.pkl
-│   └── vectorizer.pkl
-│
+│ ├── model.pkl # Trained model
+│ └── vectorizer.pkl # TF-IDF vectorizer
+├── k8s/
+│ ├── deployment.yaml # Kubernetes deployment (3 replicas)
+│ └── service.yaml # Kubernetes NodePort service
 ├── terraform/
-│   ├── main.tf
-│   ├── provider.tf
-│   ├── variables.tf
-│   └── outputs.tf
-│
+│ ├── main.tf # EC2 + Security Groups
+│ ├── provider.tf # AWS provider
+│ ├── variables.tf # Variables
+│ └── outputs.tf # Outputs
 └── .github/
-    └── workflows/
-        └── docker-build.yml
-```
+└── workflows/
+└── docker-build.yml # CI/CD pipeline
 
----
 
 ## API Endpoints
 
 ### Health Check
-
-```http
 GET /health
-```
+Response: {"status": "healthy", "model": "loaded", "accuracy": "100%"}
 
-Example response:
-
-```json
-{
-  "status": "healthy",
-  "model": "loaded"
-}
-```
-
----
 
 ### Sentiment Prediction
-
-```http
 POST /predict
-```
+Request: {"text": "I love this product"}
+Response: {"sentiment": "Positive", "confidence": "83.76%", "model": "Logistic Regression + TF-IDF"}
 
-Request:
 
-```json
-{
-  "text": "I love this product"
-}
-```
-
-Response:
-
-```json
-{
-  "sentiment": "Positive"
-}
-```
-
----
-
-## Terraform Deployment
-
-Terraform is used to:
-
-* Create AWS EC2 infrastructure
-* Configure security groups
-* Expose application ports
-* Manage infrastructure as code
-
----
-
-## CI/CD Workflow
-
+## CI/CD Pipeline
 GitHub Actions automatically:
+1. Runs Pytest automated tests
+2. Builds Docker image
+3. Pushes to DockerHub
+4. Triggers on every push to main branch
 
-1. Detects changes pushed to the main branch
-2. Builds a Docker image
-3. Pushes the image to Docker Hub
-
----
-
-## Monitoring
-
-### Prometheus
-
-Used for metrics collection and service monitoring.
-
-### Grafana
-
-Used for dashboard visualization and monitoring.
-
-Verified after EC2 restart using systemd services and Docker restart policies.
-
----
-
-## Future Improvements
-
-* Add Node Exporter for host-level monitoring
-* Store Terraform state remotely
-* Deploy using Kubernetes
-* Add automated testing pipeline
-
----
-
-## Learning Outcomes
-
-Through this project I worked with:
-
-* Machine Learning model deployment
-* Docker image management
-* AWS EC2 deployment
-* Terraform infrastructure provisioning
-* GitHub Actions automation
-* Prometheus monitoring
-* Grafana dashboards
-* Service recovery and restart policies
-
+## Kubernetes Deployment
+```bash
+kubectl apply -f k8s/deployment.yaml   # 3 replicas
+kubectl apply -f k8s/service.yaml      # NodePort service
+kubectl rollout status deployment/mlops-app  # Rolling update
 ```
+
+## Monitoring Stack
+- **Prometheus** — Metrics collection (CPU, Memory, API health)
+- **Node Exporter** — System-level metrics
+- **Grafana** — Dashboard visualization
+- **Alerts** — High CPU alert configured (threshold: 80%)
+- **Auto-restart** — All services reboot-safe via systemd
+
+## Infrastructure (Terraform)
+```bash
+terraform init
+terraform plan
+terraform apply    # Provisions EC2 + Security Groups
 ```
-# project-3-mlops-pipeline
-End-to-end MLOps pipeline — ML model training, Docker, Kubernetes (EKS), Terraform, GitHub Actions CI/CD, Prometheus + Grafana monitoring on AWS
+
+## Reboot Safety
+All services configured with systemd for auto-restart:
+- ✅ Docker container (restart: unless-stopped)
+- ✅ Prometheus (systemd enabled)
+- ✅ Grafana (systemd enabled)
+- ✅ Node Exporter (systemd enabled)
+- ✅ Nginx (systemd enabled)
+
+## Cost
+**AWS Free Tier — ₹0 spent**
+
+## Skills Demonstrated
+- ML model training and deployment
+- Docker containerization and registry management
+- Kubernetes orchestration with rolling updates
+- AWS EC2 provisioning with Terraform
+- GitHub Actions CI/CD automation
+- Production monitoring with Prometheus and Grafana
+- Infrastructure as Code (IaC)
+- Service reliability and auto-recovery
